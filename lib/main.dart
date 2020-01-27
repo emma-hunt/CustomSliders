@@ -78,15 +78,15 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
           ),
-          Container(
-            height: 50,
-            padding: EdgeInsets.all(5.0),
-            child: Text(
-              _prettifyTheValues(mySliderValue),
-              style: TextStyle(color: textColor),
-              textAlign: TextAlign.left,
-            ),
-          ),
+//          Container(
+//            height: 50,
+//            padding: EdgeInsets.all(5.0),
+//            child: Text(
+//              _prettifyTheValues(mySliderValue),
+//              style: TextStyle(color: textColor),
+//              textAlign: TextAlign.left,
+//            ),
+//          ),
 
         ],
       ),

@@ -44,8 +44,9 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
   initState() {
     super.initState();
     thumbs = new List(widget.numThumbs);
-    final RenderBox box = this.context.findRenderObject();
-    var width = box.size.width;
+//    final RenderBox box = this.context.findRenderObject();
+//    var width = box.size.width;
+    var width = 255;
     double spaceing = width/(widget.numThumbs+1);
     double xLoc = spaceing;
     for (int i = 0; i < widget.numThumbs; i++){
