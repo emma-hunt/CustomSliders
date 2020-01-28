@@ -65,6 +65,7 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
 
   void _processFingerInput (int index, PointerEvent details) {
     setState(() {
+      print("in process finger input");
       fingerX = details.localPosition.dx;
       fingerY = details.localPosition.dy;
       thumbs[index].x = details.localPosition.dx;
@@ -177,6 +178,7 @@ class MultiSliderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    print("PAINTING");
     var linePen = Paint();
 
     double middleLocation = size.height/2;
@@ -202,6 +204,7 @@ class MultiSliderPainter extends CustomPainter {
   @override
   bool shouldRepaint(MultiSliderPainter oldDelegate) {
     // returns true if field has changed from oldDelegate
+    return true;
     if (oldDelegate._radius != _radius) {
       return true;
     }

@@ -44,6 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
         prettied.add(Tuple2(x.floor().toString(),Colors.black))
       }
     });
+    prettied.sort((a,b) => a.item1.compareTo(b.item1));
     return prettied;
   }
 
@@ -86,26 +87,21 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
           ),
-//          Container(
-//            height: 100,
-//            padding: EdgeInsets.all(5.0),
-//            child:
-//            ListView.builder(
-//              itemCount: myThumbs.length,
-//                itemBuilder: (BuildContext context, int index) {
-//                  return Text(
-//                    myThumbs[index].item1.toString(),
-//                    style: TextStyle(color: myThumbs[index].item2),
-//                  );
-//                }
-//            )
-////            Text(
-////              _prettifyTheValues(myThumbs),
-////              style: TextStyle(color: textColor),
-////              textAlign: TextAlign.left,
-////            ),
-//          ),
-
+          Container(
+            height: 100,
+            padding: EdgeInsets.all(5.0),
+            child:
+            ListView.builder(
+                itemCount: myThumbs.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Text(
+                    myThumbs[index].item1.toString(),
+                    style: TextStyle(color: myThumbs[index].item2),
+                    textAlign: TextAlign.center,
+                  );
+                }
+            )
+          ),
         ],
       ),
     );
