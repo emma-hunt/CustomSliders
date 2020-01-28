@@ -38,32 +38,33 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
   double fingerY = 0.0;
   double radius = 15.0;
   bool isSliderActive = false;
-  List<Thumb> thumbs;
-
-  @override
-  initState() {
-    super.initState();
-    thumbs = new List(widget.numThumbs);
-//    final RenderBox box = this.context.findRenderObject();
-//    var width = box.size.width;
-    var width = 255;
-    double spaceing = width/(widget.numThumbs+1);
-    double xLoc = spaceing;
-    for (int i = 0; i < widget.numThumbs; i++){
-      thumbs[i] = new Thumb(x: xLoc, isActive: false);
-      xLoc = xLoc + spaceing;
-    }
-  }
+  List<Thumb> thumbs = [Thumb(x: 0, isActive: false)];
+//
+//  @override
+//  initState() {
+//    super.initState();
+//    thumbs = new List(widget.numThumbs);
+////    final RenderBox box = this.context.findRenderObject();
+////    var width = box.size.width;
+//    var width = 255;
+//    double spaceing = width/(widget.numThumbs+1);
+//    double xLoc = spaceing;
+//    for (int i = 0; i < widget.numThumbs; i++){
+//      thumbs[i] = new Thumb(x: xLoc, isActive: false);
+//      xLoc = xLoc + spaceing;
+//    }
+//  }
 
   // interpolates from actual thumb position to value in user specified coordinate system
   double _interpolateValue(double sliderValue, double sliderMax) {
     return (sliderValue * ((widget.endValue+1 - widget.startValue)/sliderMax)) + widget.startValue;
   }
 
-  void _processFingerInput (PointerEvent details) {
+  void _processFingerInput (int index, PointerEvent details) {
     setState(() {
       fingerX = details.localPosition.dx;
       fingerY = details.localPosition.dy;
+      thumbs[index].x = details.localPosition.dx;
       final RenderBox box = this.context.findRenderObject();
       var size = box.size;
       widget.onChanged(_interpolateValue(fingerX, size.width)); // this is how we report
@@ -71,31 +72,51 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
     });
   }
 
-  void _processFingerDown() {
+  void _processFingerDown(int index) {
     setState(() {
       isSliderActive = true;
+      thumbs[index].isActive = true;
       widget.onActive();
     });
   }
 
-  void _processFingerUp() {
+  void _processFingerUp(int index) {
     setState(() {
       isSliderActive = false;
+      thumbs[index].isActive = false;
       widget.onInactive();
     });
   }
 
   void _fingerDown (PointerEvent details) {
-    _processFingerDown();
-    _processFingerInput (details);
+    for(int i = 0; i < thumbs.length; i++) {
+      if((details.localPosition.dx - thumbs[i].x).abs() < 20) {
+        //there was a collision
+        _processFingerDown(i);
+        _processFingerInput (i, details);
+        return;
+      }
+    }
   }
 
   void _fingerMove (PointerEvent details) {
-    _processFingerInput (details);
+    if(isSliderActive){
+      for (int i = 0; i < thumbs.length; i++) {
+        if (thumbs[i].isActive) {
+          _processFingerInput (i, details);
+        }
+      }
+    }
   }
 
   void _fingerUp (PointerEvent details) {
-    _processFingerUp();
+    if (isSliderActive) {
+      for (int i = 0; i < thumbs.length; i++) {
+        if (thumbs[i].isActive) {
+          _processFingerUp(i);
+        }
+      }
+    }
   }
 
   // build is called every time setState is
