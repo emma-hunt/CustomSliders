@@ -38,24 +38,25 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
   double fingerY = 0.0;
   double radius = 15.0;
   bool isSliderActive = false;
-  List<Thumb> thumbs = [Thumb(x: 0, isActive: false)];
-//
-//  @override
-//  initState() {
-//    super.initState();
-//    thumbs = new List(widget.numThumbs);
-////    final RenderBox box = this.context.findRenderObject();
-////    var width = box.size.width;
-//    var width = 255;
-//    double spaceing = width/(widget.numThumbs+1);
-//    double xLoc = spaceing;
-//    for (int i = 0; i < widget.numThumbs; i++){
-//      thumbs[i] = new Thumb(x: xLoc, isActive: false);
-//      xLoc = xLoc + spaceing;
-//    }
-//  }
+  List<Thumb> thumbs = [new Thumb(x: 0, isActive: false)];
+
+  @override
+  initState() {
+    super.initState();
+    thumbs = new List(widget.numThumbs);
+//    final RenderBox box = this.context.findRenderObject();
+//    var width = box.size.width;
+    var width = 255;
+    double spaceing = width/(widget.numThumbs+1);
+    double xLoc = spaceing;
+    for (int i = 0; i < widget.numThumbs; i++){
+      thumbs[i] = new Thumb(x: xLoc, isActive: false);
+      xLoc = xLoc + spaceing;
+    }
+  }
 
   // interpolates from actual thumb position to value in user specified coordinate system
+
   double _interpolateValue(double sliderValue) {
     final RenderBox box = this.context.findRenderObject();
     var sliderMax = box.size.width;
@@ -79,6 +80,7 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
   }
 
   void _processFingerDown(int index) {
+    print(thumbs.toString());
     setState(() {
       isSliderActive = true;
       thumbs[index].isActive = true;
@@ -88,6 +90,7 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
       }
       widget.onActive(thumbInfo);
     });
+    print(thumbs.toString());
   }
 
   void _processFingerUp(int index) {
@@ -117,9 +120,10 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
     if(isSliderActive){
       for (int i = 0; i < thumbs.length; i++) {
         if (thumbs[i].isActive) {
+          print("finger " + i.toString());
           _processFingerInput (i, details);
+          return;
         }
-        return;
       }
     }
   }
@@ -129,6 +133,7 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
       for (int i = 0; i < thumbs.length; i++) {
         if (thumbs[i].isActive) {
           _processFingerUp(i);
+          return;
         }
       }
     }
@@ -173,7 +178,7 @@ class MultiSliderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     var linePen = Paint();
-    var thumbPen = Paint();
+
     double middleLocation = size.height/2;
     double centerLocation = size.width/2;
 
@@ -183,9 +188,10 @@ class MultiSliderPainter extends CustomPainter {
     canvas.drawLine(Offset(0, middleLocation), Offset(size.width, middleLocation), linePen);
 
     //draw thumbs
-    thumbPen.style = PaintingStyle.fill;
     if(_thumbs != null) {
       for (Thumb thumb in _thumbs) {
+        var thumbPen = Paint();
+        thumbPen.style = PaintingStyle.fill;
         thumbPen.color = convertLocToCol(thumb.x, thumb.isActive, size);
         canvas.drawCircle(Offset(thumb.x, middleLocation), _radius, thumbPen);
       }
