@@ -1,44 +1,50 @@
 import 'package:flutter/material.dart';
 
-class MultiThumbSlider extends StatefulWidget {
+class CurvedSlider extends StatefulWidget {
   final ValueChanged<Map> onChanged;
   final ValueChanged<Map> onActive;
   final ValueChanged<Map> onInactive;
   final double startValue;
   final double endValue;
+  final double minorRad;
+  final double majorRad;
   final int numThumbs;
 
   // constructor override
-  MultiThumbSlider ({
-    @required this.numThumbs,
+  CurvedSlider ({
+    @required this.minorRad,
+    @required this.majorRad,
     @required this.startValue,
     @required this.endValue,
+    this.numThumbs,
     this.onChanged,
     this.onActive,
     this.onInactive,
   });
 
   @override
-  _MultiThumbSliderState createState() => _MultiThumbSliderState();
+  _CurvedSliderState createState() => _CurvedSliderState();
 
 }
 
 class Thumb {
   double x;
+  double y;
   bool isActive = false;
 
   Thumb({
     @required this.x,
+    @required this.y,
     this.isActive
   });
 }
 
-class _MultiThumbSliderState extends State<MultiThumbSlider> {
+class _CurvedSliderState extends State<CurvedSlider> {
   double fingerX = 0.0;
   double fingerY = 0.0;
-  double radius = 15.0;
+  double thumbRadius = 15.0;
   bool isSliderActive = false;
-  List<Thumb> thumbs = [new Thumb(x: 0, isActive: false)];
+  List<Thumb> thumbs = [new Thumb(x: 0, y: 0, isActive: false)];
 
   @override
   initState() {
@@ -49,8 +55,9 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
     var width = 255;
     double spaceing = width/(widget.numThumbs+1);
     double xLoc = spaceing;
+    double yLoc = 0;
     for (int i = 0; i < widget.numThumbs; i++){
-      thumbs[i] = new Thumb(x: xLoc, isActive: false);
+      thumbs[i] = new Thumb(x: xLoc, y: yLoc, isActive: false);
       xLoc = xLoc + spaceing;
     }
   }
@@ -152,18 +159,18 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
             onPointerMove: _fingerMove,
             onPointerUp: _fingerUp,
             child: CustomPaint ( // custom painter
-              painter: MultiSliderPainter(radius, thumbs),
+              painter: CurvedSliderPainter(thumbRadius, thumbs),
             )
         ),
       );
   }
 }
 
-class MultiSliderPainter extends CustomPainter {
+class CurvedSliderPainter extends CustomPainter {
   double _radius;
   List<Thumb> _thumbs;
 
-  MultiSliderPainter(this._radius, this._thumbs);
+  CurvedSliderPainter(this._radius, this._thumbs);
 
   Color convertLocToCol(double position, bool isActive, Size size) {
     double p = position/size.width;
@@ -208,7 +215,7 @@ class MultiSliderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(MultiSliderPainter oldDelegate) {
+  bool shouldRepaint(CurvedSliderPainter oldDelegate) {
     // returns true if field has changed from oldDelegate
     return true;
     if (oldDelegate._radius != _radius) {

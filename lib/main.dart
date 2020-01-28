@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 import 'MultiThumbSlider.dart';
+import 'CurvedSlider.dart';
 
 void main() => runApp(MyApp());
 
@@ -62,8 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
         // the cross axis would be horizontal
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          MultiThumbSlider(
-            numThumbs: 3,
+          CurvedSlider(
+            minorRad: 200,
+            majorRad: 400,
+            numThumbs: 1,
             startValue: 0,
             endValue: 100,
             onChanged: (Map newThumbs) {
