@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class MultiThumbSlider extends StatefulWidget {
-  final ValueChanged<double> onChanged;
-  final VoidCallback onActive;
-  final VoidCallback onInactive;
+  final ValueChanged<Map> onChanged;
+  final ValueChanged<Map> onActive;
+  final ValueChanged<Map> onInactive;
   final double startValue;
   final double endValue;
   final int numThumbs;
@@ -56,7 +56,9 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
 //  }
 
   // interpolates from actual thumb position to value in user specified coordinate system
-  double _interpolateValue(double sliderValue, double sliderMax) {
+  double _interpolateValue(double sliderValue) {
+    final RenderBox box = this.context.findRenderObject();
+    var sliderMax = box.size.width;
     return (sliderValue * ((widget.endValue+1 - widget.startValue)/sliderMax)) + widget.startValue;
   }
 
@@ -65,10 +67,14 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
       fingerX = details.localPosition.dx;
       fingerY = details.localPosition.dy;
       thumbs[index].x = details.localPosition.dx;
-      final RenderBox box = this.context.findRenderObject();
-      var size = box.size;
-      widget.onChanged(_interpolateValue(fingerX, size.width)); // this is how we report
-      // actually figure out the max x value
+
+      //reporting
+      Map thumbInfo = new Map<double, bool>();
+      for (Thumb thumb in thumbs){
+        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
+      }
+      // sort the map??
+      widget.onChanged(thumbInfo); // this is how we report
     });
   }
 
@@ -76,7 +82,11 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
     setState(() {
       isSliderActive = true;
       thumbs[index].isActive = true;
-      widget.onActive();
+      Map thumbInfo = new Map<double, bool>();
+      for (Thumb thumb in thumbs){
+        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
+      }
+      widget.onActive(thumbInfo);
     });
   }
 
@@ -84,7 +94,11 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
     setState(() {
       isSliderActive = false;
       thumbs[index].isActive = false;
-      widget.onInactive();
+      Map thumbInfo = new Map<double, bool>();
+      for (Thumb thumb in thumbs){
+        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
+      }
+      widget.onInactive(thumbInfo);
     });
   }
 
@@ -105,6 +119,7 @@ class _MultiThumbSliderState extends State<MultiThumbSlider> {
         if (thumbs[i].isActive) {
           _processFingerInput (i, details);
         }
+        return;
       }
     }
   }

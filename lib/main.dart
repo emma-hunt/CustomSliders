@@ -27,14 +27,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Color textColor = Colors.black;
-  double mySliderValue = 0.0;
+  Map myThumbs;
   bool isSliderActive = false;
 
-  String _prettifyTheValues(double sliderValue) {
-    if (sliderValue.isNaN) {
+  String _prettifyTheValues(Map<double, bool> thumbsInfo) {
+    if (thumbsInfo == null || thumbsInfo.isEmpty) {
       return "bugger";
     }
-    return sliderValue.floor().toString();
+    return thumbsInfo.toString();
+//    String s = "";
+//    thumbs.forEach((k,v) => (s+" " + k.floor().toString()));
+//    return s;
   }
 
   @override
@@ -55,23 +58,25 @@ class _MyHomePageState extends State<MyHomePage> {
             numThumbs: 3,
             startValue: 0,
             endValue: 100,
-            onChanged: (double newValue) {
+            onChanged: (Map newThumbs) {
               print("in value callback ");
               setState(() {
-                mySliderValue = newValue;
+                myThumbs = newThumbs;
               });
             },
-            onActive: () {
+            onActive: (Map newThumbs) {
               print("in active callback");
               setState(() {
                 isSliderActive = true;
+                myThumbs = newThumbs;
                 textColor = Colors.red;
               });
             },
-            onInactive: () {
+            onInactive: (Map newThumbs) {
               print("in inactive callback");
               setState(() {
                 isSliderActive = false;
+                myThumbs = newThumbs;
                 textColor = Colors.black;
                 print(textColor);
               });
@@ -81,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 50,
             padding: EdgeInsets.all(5.0),
             child: Text(
-              _prettifyTheValues(mySliderValue),
+              _prettifyTheValues(myThumbs),
               style: TextStyle(color: textColor),
               textAlign: TextAlign.left,
             ),
