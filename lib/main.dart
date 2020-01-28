@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tuple/tuple.dart';
 import 'MultiThumbSlider.dart';
 
 void main() => runApp(MyApp());
@@ -26,18 +27,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Color textColor = Colors.black;
-  Map myThumbs;
+  List<Tuple2> myThumbs = List();
   bool isSliderActive = false;
 
-  String _prettifyTheValues(Map<double, bool> thumbsInfo) {
+  List<Tuple2> _prettifyTheValues(Map<double, bool> thumbsInfo) {
+    List<Tuple2> prettied = List<Tuple2>();
     if (thumbsInfo == null || thumbsInfo.isEmpty) {
-      return "bugger";
+      prettied.add(Tuple2("woops", Colors.black));
+      return prettied;
     }
-    return thumbsInfo.toString();
-//    String s = "";
-//    thumbs.forEach((k,v) => (s+" " + k.floor().toString()));
-//    return s;
+    thumbsInfo.forEach((x, isActive) => {
+      if(isActive) {
+        prettied.add(Tuple2(x.floor().toString(), Colors.red))
+      }
+      else {
+        prettied.add(Tuple2(x.floor().toString(),Colors.black))
+      }
+    });
+    return prettied;
   }
 
   @override
@@ -61,39 +68,46 @@ class _MyHomePageState extends State<MyHomePage> {
             onChanged: (Map newThumbs) {
               print("in value callback ");
               setState(() {
-                myThumbs = newThumbs;
+                myThumbs = _prettifyTheValues(newThumbs);
               });
             },
             onActive: (Map newThumbs) {
               print("in active callback");
               setState(() {
                 isSliderActive = true;
-                myThumbs = newThumbs;
-                textColor = Colors.red;
+                myThumbs = _prettifyTheValues(newThumbs);
               });
             },
             onInactive: (Map newThumbs) {
               print("in inactive callback");
               setState(() {
                 isSliderActive = false;
-                myThumbs = newThumbs;
-                textColor = Colors.black;
-                print(textColor);
+                myThumbs = _prettifyTheValues(newThumbs);
               });
             },
           ),
-          Container(
-            padding: EdgeInsets.all(5.0),
-            child: Text(
-              _prettifyTheValues(myThumbs),
-              style: TextStyle(color: textColor),
-              textAlign: TextAlign.left,
-            ),
-          ),
+//          Container(
+//            height: 100,
+//            padding: EdgeInsets.all(5.0),
+//            child:
+//            ListView.builder(
+//              itemCount: myThumbs.length,
+//                itemBuilder: (BuildContext context, int index) {
+//                  return Text(
+//                    myThumbs[index].item1.toString(),
+//                    style: TextStyle(color: myThumbs[index].item2),
+//                  );
+//                }
+//            )
+////            Text(
+////              _prettifyTheValues(myThumbs),
+////              style: TextStyle(color: textColor),
+////              textAlign: TextAlign.left,
+////            ),
+//          ),
 
         ],
       ),
     );
   }
 }
-
