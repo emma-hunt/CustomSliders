@@ -181,13 +181,13 @@ class MultiSliderPainter extends CustomPainter {
     print("PAINTING");
     var linePen = Paint();
 
-    double middleLocation = size.height/2;
-    double centerLocation = size.width/2;
+    double middleHeight = size.height/2;
+    double middleWidth = size.width/2;
 
     //draw line
     linePen.color = Colors.grey;
     linePen.style = PaintingStyle.fill;
-    canvas.drawLine(Offset(0, middleLocation), Offset(size.width, middleLocation), linePen);
+    canvas.drawLine(Offset(0, middleHeight), Offset(size.width, middleHeight), linePen);
 
     //draw thumbs
     if(_thumbs != null) {
@@ -195,13 +195,13 @@ class MultiSliderPainter extends CustomPainter {
         var backgroundPen = Paint();
         backgroundPen.style = PaintingStyle.fill;
         backgroundPen.color = Colors.white;
-        canvas.drawCircle(Offset(thumb.x, middleLocation), _radius, backgroundPen);
+        canvas.drawCircle(Offset(thumb.x, middleHeight), _radius, backgroundPen);
       }
       for (Thumb thumb in _thumbs) {
         var thumbPen = Paint();
         thumbPen.style = PaintingStyle.fill;
         thumbPen.color = convertLocToCol(thumb.x, thumb.isActive, size);
-        canvas.drawCircle(Offset(thumb.x, middleLocation), _radius, thumbPen);
+        canvas.drawCircle(Offset(thumb.x, middleHeight), _radius, thumbPen);
       }
     }
     // draw the line all the way across the center of the canvas

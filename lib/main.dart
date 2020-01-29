@@ -64,8 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           CurvedSlider(
-            minorRad: 200,
-            majorRad: 400,
+            minorRad: 150,
+            majorRad: 300,
             numThumbs: 1,
             startValue: 0,
             endValue: 100,
@@ -90,21 +90,21 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
           ),
-          Container(
-            height: 100,
-            padding: EdgeInsets.all(5.0),
-            child:
-            ListView.builder(
-                itemCount: myThumbs.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text(
-                    myThumbs[index].item1.toString(),
-                    style: TextStyle(color: myThumbs[index].item2),
-                    textAlign: TextAlign.center,
-                  );
-                }
-            )
-          ),
+//          Container(
+//            height: 100,
+//            padding: EdgeInsets.all(5.0),
+//            child:
+//            ListView.builder(
+//                itemCount: myThumbs.length,
+//                itemBuilder: (BuildContext context, int index) {
+//                  return Text(
+//                    myThumbs[index].item1.toString(),
+//                    style: TextStyle(color: myThumbs[index].item2),
+//                    textAlign: TextAlign.center,
+//                  );
+//                }
+//            )
+//          ),
         ],
       ),
     );
