@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
@@ -53,21 +53,15 @@ class _CurvedSliderState extends State<CurvedSlider> {
   initState() {
     super.initState();
     thumbs = new List(widget.numThumbs);
-//    final RenderBox box = this.context.findRenderObject();
-//    print(box.toString());
-//    Offset xOffset = box.localToGlobal(Offset.zero);
-//    var width = box.size.width;
-//    var width = 255;
-//    double spaceing = width/(widget.numThumbs+1);
-//    double xLoc = spaceing;
-//    double yLoc = 0;
 
     //just gunna start at 45 degrees
     double r = (widget.minorRad * widget.majorRad) / sqrt(pow(widget.minorRad,2)*pow(sin(pi/4),2) + pow(widget.majorRad,2)*pow(cos(pi/4),2));
     double xLoc = r * cos(pi/4);
-    double yLoc = r * sin(pi/4);
+    double height = window.physicalSize.height;
+    double yLoc = r * sin(pi/4) + Scaffold.of(this.context).appBarMaxHeight;
     for (int i = 0; i < widget.numThumbs; i++){
       thumbs[i] = new Thumb(x: xLoc, y: yLoc, isActive: false);
+      print(yLoc);
       //xLoc = xLoc + spaceing;
     }
   }
@@ -153,6 +147,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
     setState(() {
       isSliderActive = false;
       thumbs[index].isActive = false;
+      print(thumbs[index].y);
       Map thumbInfo = new Map<double, bool>();
       for (Thumb thumb in thumbs){
         thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;

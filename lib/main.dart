@@ -70,20 +70,20 @@ class _MyHomePageState extends State<MyHomePage> {
             startValue: 0,
             endValue: 100,
             onChanged: (Map newThumbs) {
-              print("in value callback ");
+              //print("in value callback ");
               setState(() {
                 myThumbs = _prettifyTheValues(newThumbs);
               });
             },
             onActive: (Map newThumbs) {
-              print("in active callback");
+              //print("in active callback");
               setState(() {
                 isSliderActive = true;
                 myThumbs = _prettifyTheValues(newThumbs);
               });
             },
             onInactive: (Map newThumbs) {
-              print("in inactive callback");
+              //print("in inactive callback");
               setState(() {
                 isSliderActive = false;
                 myThumbs = _prettifyTheValues(newThumbs);
