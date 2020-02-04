@@ -64,9 +64,10 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           CurvedSlider(
-            minorRad: 150,
-            majorRad: 300,
-            numThumbs: 1,
+            minorRad: 200,
+            majorRad: 200,
+            numThumbs: 2,
+            side: Side.left,
             startValue: 0,
             endValue: 100,
             onChanged: (Map newThumbs) {

@@ -3,6 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
+enum Side {
+  left,
+  right
+}
+
 class CurvedSlider extends StatefulWidget {
   final ValueChanged<Map> onChanged;
   final ValueChanged<Map> onActive;
@@ -12,6 +17,8 @@ class CurvedSlider extends StatefulWidget {
   final double minorRad;
   final double majorRad;
   final int numThumbs;
+  final Side side;
+
 
   // constructor override
   CurvedSlider ({
@@ -19,6 +26,7 @@ class CurvedSlider extends StatefulWidget {
     @required this.majorRad,
     @required this.startValue,
     @required this.endValue,
+    @required this.side,
     this.numThumbs,
     this.onChanged,
     this.onActive,
@@ -57,12 +65,34 @@ class _CurvedSliderState extends State<CurvedSlider> {
     //just gunna start at 45 degrees
     double r = (widget.minorRad * widget.majorRad) / sqrt(pow(widget.minorRad,2)*pow(sin(pi/4),2) + pow(widget.majorRad,2)*pow(cos(pi/4),2));
     double xLoc = r * cos(pi/4);
-    double height = window.physicalSize.height;
+    if(widget.side == Side.right) {
+      //flip it
+      xLoc = 240 - xLoc;
+    }
     double yLoc = r * sin(pi/4) + Scaffold.of(this.context).appBarMaxHeight;
+    //double yLoc = MediaQuery.of(this.context).size.height;
+    //double xLoc = widget.minorRad;
     for (int i = 0; i < widget.numThumbs; i++){
       thumbs[i] = new Thumb(x: xLoc, y: yLoc, isActive: false);
-      print(yLoc);
+      //print(yLoc);
       //xLoc = xLoc + spaceing;
+    }
+  }
+
+  void _placeThumbs() {
+    for (int i = 0; i < widget.numThumbs; i++){
+      if(thumbs[i].x == 0 && thumbs[i].y == 0) {
+        print("HERE");
+        double r = (widget.minorRad * widget.majorRad) / sqrt(pow(widget.minorRad,2)*pow(sin(pi/4),2) + pow(widget.majorRad,2)*pow(cos(pi/4),2));
+        double xLoc = r * cos(pi/4);
+        if(widget.side == Side.right) {
+          //flip it
+          xLoc = xLoc - MediaQuery.of(this.context).size.width;
+        }
+        double yLoc = r * sin(pi/4);
+        thumbs[i].x = xLoc;
+        thumbs[i].y = yLoc;
+      }
     }
   }
 
@@ -76,7 +106,14 @@ class _CurvedSliderState extends State<CurvedSlider> {
 
   double _convertXtoEllipse(double screenX){
     //left
-    return screenX;
+    if (widget.side == Side.left) {
+      return screenX;
+    }
+    else {
+      final RenderBox box = this.context.findRenderObject();
+      var width = box.size.width;
+      return width - screenX;
+    }
   }
 
   double _convertYtoEllipse(double screenY) {
@@ -87,12 +124,18 @@ class _CurvedSliderState extends State<CurvedSlider> {
   }
 
   double _convertXtoScreen(double ellipseX) {
-    //left
-    return ellipseX;
+    if (widget.side == Side.left) {
+      return ellipseX;
+    }
+    else {
+      final RenderBox box = this.context.findRenderObject();
+      var width = box.size.width;
+      return width - ellipseX;
+    }
   }
 
   double _convertYtoScreen(double ellipseY) {
-    //left
+    //left or right
     final RenderBox box = this.context.findRenderObject();
     var height = box.size.height;
     return height - ellipseY;
@@ -110,7 +153,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
 
   void _processFingerInput (int index, PointerEvent details) {
     setState(() {
-      print("in process finger input");
+      //print("in process finger input");
       fingerX = details.localPosition.dx;
       fingerY = details.localPosition.dy;
 
@@ -147,7 +190,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
     setState(() {
       isSliderActive = false;
       thumbs[index].isActive = false;
-      print(thumbs[index].y);
+      print(thumbs[index].x);
       Map thumbInfo = new Map<double, bool>();
       for (Thumb thumb in thumbs){
         thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
@@ -158,7 +201,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
 
   void _fingerDown (PointerEvent details) {
     for(int i = 0; i < thumbs.length; i++) {
-      if((details.localPosition.dx - thumbs[i].x).abs() < 20) {
+      if((details.localPosition.dx - thumbs[i].x).abs() < 10) {
         //there was a collision
         _processFingerDown(i);
         _processFingerInput (i, details);
@@ -192,6 +235,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
 
   // build is called every time setState is
   Widget build(BuildContext context) {
+    //_placeThumbs();
     return
       Container (
         width: double.infinity,
@@ -202,7 +246,7 @@ class _CurvedSliderState extends State<CurvedSlider> {
             onPointerMove: _fingerMove,
             onPointerUp: _fingerUp,
             child: CustomPaint ( // custom painter
-              painter: CurvedSliderPainter(widget.minorRad, widget.majorRad, thumbRadius, thumbs),
+              painter: CurvedSliderPainter(widget.minorRad, widget.majorRad, thumbRadius, thumbs, widget.side),
             )
         ),
       );
@@ -214,12 +258,13 @@ class CurvedSliderPainter extends CustomPainter {
   double _minorRad;
   double _majorRad;
   List<Thumb> _thumbs;
+  Side _side;
 
-  CurvedSliderPainter(this._minorRad, this._majorRad, this._thumbRad, this._thumbs);
+  CurvedSliderPainter(this._minorRad, this._majorRad, this._thumbRad, this._thumbs, this._side);
 
   Color _convertLocToCol(double position, bool isActive, Size size) {
     double p = position/size.width;
-    Color rawColor = Color.lerp(Colors.cyan, Colors.deepPurple, p);
+    Color rawColor = Color.lerp(Colors.deepPurple, Colors.cyan, p);
     if (isActive) {
       return Color.fromRGBO(rawColor.red, rawColor.green, rawColor.blue, 1.0);
     }
@@ -236,11 +281,6 @@ class CurvedSliderPainter extends CustomPainter {
     double middleLocation = size.height/2;
     double centerLocation = size.width/2;
 
-    //draw line
-//    linePen.color = Colors.grey;
-//    linePen.style = PaintingStyle.fill;
-//    canvas.drawLine(Offset(0, middleLocation), Offset(size.width, middleLocation), linePen);
-
     Paint paint = Paint();
     paint.color = Colors.grey;
     paint.style = PaintingStyle.stroke;
@@ -248,13 +288,16 @@ class CurvedSliderPainter extends CustomPainter {
 
     Path path = Path();
 
-    //left
-    path.moveTo(-_minorRad, 0);
-    path.arcTo(Rect.fromLTWH(-_minorRad, size.height-_majorRad, _minorRad*2, _majorRad*2), 0, -pi/2, true);
+    if(_side == Side.left){
+      path.moveTo(-_minorRad, 0);
+      path.arcTo(Rect.fromLTWH(-_minorRad, size.height-_majorRad, _minorRad*2, _majorRad*2), 0, -pi/2, true);
 
-    //right
-//    path.moveTo(size.width - _minorRad, size.height);
-//    path.arcTo(Rect.fromLTWH(size.width-_minorRad, size.height-_majorRad, _minorRad*2, _majorRad*2), 2*pi/2, pi/2, true);
+    }
+    else {
+      //right
+      path.moveTo(size.width - _minorRad, size.height);
+      path.arcTo(Rect.fromLTWH(size.width-_minorRad, size.height-_majorRad, _minorRad*2, _majorRad*2), 2*pi/2, pi/2, true);
+    }
     canvas.drawPath(path, paint);
 
     //draw thumbs
@@ -277,6 +320,9 @@ class CurvedSliderPainter extends CustomPainter {
   @override
   bool shouldRepaint(CurvedSliderPainter oldDelegate) {
     // returns true if field has changed from oldDelegate
+    if(oldDelegate._minorRad != _minorRad || oldDelegate._majorRad != _majorRad || oldDelegate._side != _side) {
+      //arch has changed, recalculate thumb positions
+    }
     return true;
 //    if (oldDelegate._radius != _radius) {
 //      return true;
