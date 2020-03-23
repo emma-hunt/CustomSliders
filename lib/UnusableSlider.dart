@@ -25,35 +25,38 @@ class UnusableSlider extends StatefulWidget {
 }
 
 class Thumb {
-  double x;
+  double current;
+  double origin;
+  double goal;
   bool isActive = false;
 
   Thumb({
-    @required this.x,
-    this.isActive
+    @required this.current,
+    this.origin,
+    this.goal,
+    this.isActive,
   });
 }
 
-class _UnusableSliderState extends State<UnusableSlider> {
+class _UnusableSliderState extends State<UnusableSlider> with TickerProviderStateMixin {
   double fingerX = 0.0;
   double fingerY = 0.0;
   double radius = 15.0;
   bool isSliderActive = false;
-  List<Thumb> thumbs = [new Thumb(x: 0, isActive: false)];
+  Thumb thumb = new Thumb(current: 0, origin: 0, goal: 0, isActive: false);
+  Animation<double> _animation;
+  AnimationController controller;
 
   @override
   initState() {
     super.initState();
-    thumbs = new List(widget.numThumbs);
+    //thumb = new List(widget.numThumbs);
 //    final RenderBox box = this.context.findRenderObject();
 //    var width = box.size.width;
     var width = 255;
-    double spaceing = width/(widget.numThumbs+1);
-    double xLoc = spaceing;
-    for (int i = 0; i < widget.numThumbs; i++){
-      thumbs[i] = new Thumb(x: xLoc, isActive: false);
-      xLoc = xLoc + spaceing;
-    }
+    double xLoc = width/(widget.numThumbs+1);
+    thumb = new Thumb(current: xLoc, origin: xLoc, goal: xLoc, isActive: false);
+
   }
 
   // interpolates from actual thumb position to value in user specified coordinate system
@@ -66,113 +69,126 @@ class _UnusableSliderState extends State<UnusableSlider> {
     return widget.endValue - correctValue;
   }
 
-  void _processFingerInput (int index, PointerEvent details) {
+  void _processFingerInput (PointerEvent details) {
     setState(() {
-      print("in process finger input");
       fingerX = details.localPosition.dx;
       fingerY = details.localPosition.dy;
-      thumbs[index].x = details.localPosition.dx;
+      thumb.current = details.localPosition.dx;
 
       //reporting
       Map thumbInfo = new Map<double, bool>();
-      for (Thumb thumb in thumbs){
-        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
-      }
+      thumbInfo[_interpolateValue(thumb.current)] = thumb.isActive;
       // sort the map??
       widget.onChanged(thumbInfo); // this is how we report
     });
   }
 
-  void _processFingerDown(int index) {
-    print(thumbs.toString());
+  void _processFingerDown() {
+    print(thumb.toString());
     setState(() {
       isSliderActive = true;
       //thumbs[index].isActive = true;
       var rand = Random();
       // randomly choose to move right or left by a random amount
       var offset = 40 + rand.nextInt(60);
-      print("original posiiton: " + thumbs[index].x.toString());
+      thumb.origin = thumb.current;
+      print("original position: " + thumb.origin.toString());
       print("rand offset: " + offset.toString());
       final RenderBox box = this.context.findRenderObject();
       var sliderMax = box.size.width;
       //move the thumb
-      if (thumbs[index].x -offset < 0) {
+      if (thumb.origin -offset < 0) {
         //must move right
-        thumbs[index].x = thumbs[index].x + offset;
+        thumb.goal = thumb.origin + offset;
       }
-      else if (thumbs[index].x + offset > sliderMax) {
+      else if (thumb.origin + offset > sliderMax) {
         // must move left
-        thumbs[index].x = thumbs[index].x - offset;
+        thumb.goal = thumb.origin - offset;
       }
       else {
         // move the direction of goRight boolean
         var goRight = rand.nextBool();
         if (goRight){
-          thumbs[index].x = thumbs[index].x + offset;
+          thumb.goal = thumb.origin + offset;
         }
         else {
-          thumbs[index].x = thumbs[index].x - offset;
+          thumb.goal = thumb.origin - offset;
         }
       }
-      print("final posiiton: " + thumbs[index].x.toString());
-      //report
+      print("final position: " + thumb.goal.toString());
+      controller = AnimationController(duration: Duration(milliseconds: 250), vsync: this);
+      //controller.fling(velocity: 2);
+      controller.forward();
+      controller.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          //reset origin and goal
+          //controller.reset();
+          print("complete animation");
+        }
+//        else if (status == AnimationStatus.dismissed) {
+//          print("animate!");
+//          controller.forward();
+//        }
+      });
+      //report only actual current value
       Map thumbInfo = new Map<double, bool>();
-      for (Thumb thumb in thumbs){
-        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
-      }
+      thumbInfo[_interpolateValue(thumb.current)] = thumb.isActive;
       widget.onActive(thumbInfo);
     });
-    print(thumbs.toString());
   }
 
-  void _processFingerUp(int index) {
+  void _processFingerUp() {
     setState(() {
       isSliderActive = false;
-      thumbs[index].isActive = false;
+      thumb.isActive = false;
       Map thumbInfo = new Map<double, bool>();
-      for (Thumb thumb in thumbs){
-        thumbInfo[_interpolateValue(thumb.x)] = thumb.isActive;
-      }
+      thumbInfo[_interpolateValue(thumb.current)] = thumb.isActive;
       widget.onInactive(thumbInfo);
     });
   }
 
   void _fingerDown (PointerEvent details) {
-    for(int i = 0; i < thumbs.length; i++) {
-      if((details.localPosition.dx - thumbs[i].x).abs() < 10) {
-        //there was a collision
-        _processFingerDown(i);
-        //_processFingerInput (i, details);
-        return;
-      }
+    if((details.localPosition.dx - thumb.current).abs() < 10) {
+      //there was a collision
+      _processFingerDown();
+      //_processFingerInput (i, details);
+      return;
     }
   }
 
   void _fingerMove (PointerEvent details) {
     if(isSliderActive){
-      for (int i = 0; i < thumbs.length; i++) {
-        if (thumbs[i].isActive) {
-          print("finger " + i.toString());
-          _processFingerInput (i, details);
-          return;
-        }
+      if (thumb.isActive) {
+        _processFingerInput (details);
+        return;
       }
     }
   }
 
   void _fingerUp (PointerEvent details) {
     if (isSliderActive) {
-      for (int i = 0; i < thumbs.length; i++) {
-        if (thumbs[i].isActive) {
-          _processFingerUp(i);
-          return;
-        }
+      if (thumb.isActive) {
+        _processFingerUp();
+        return;
       }
     }
   }
 
   // build is called every time setState is
   Widget build(BuildContext context) {
+    if(thumb.current != thumb.goal) {
+      _animation = Tween(begin: thumb.origin, end: thumb.goal).chain(CurveTween(curve:Curves.ease))
+          .animate(controller)
+        ..addListener(() {
+          setState(() {
+            thumb.current = _animation.value;
+            Map thumbInfo = new Map<double, bool>();
+            thumbInfo[_interpolateValue(thumb.current)] = thumb.isActive;
+            widget.onChanged(thumbInfo);
+          });
+        });
+    }
+
     return
       Container (
         width: double.infinity,
@@ -183,18 +199,24 @@ class _UnusableSliderState extends State<UnusableSlider> {
             onPointerMove: _fingerMove,
             onPointerUp: _fingerUp,
             child: CustomPaint ( // custom painter
-              painter: UnusableSliderPainter(radius, thumbs),
+              painter: UnusableSliderPainter(radius, thumb),
             )
         ),
       );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 
 class UnusableSliderPainter extends CustomPainter {
   double _radius;
-  List<Thumb> _thumbs;
+  Thumb _thumb;
 
-  UnusableSliderPainter(this._radius, this._thumbs);
+  UnusableSliderPainter(this._radius, this._thumb);
 
   Color convertLocToCol(double position, bool isActive, Size size) {
     double p = position/size.width;
@@ -220,19 +242,15 @@ class UnusableSliderPainter extends CustomPainter {
     canvas.drawLine(Offset(0, middleHeight), Offset(size.width, middleHeight), linePen);
 
     //draw thumbs
-    if(_thumbs != null) {
-      for (Thumb thumb in _thumbs) {
-        var backgroundPen = Paint();
-        backgroundPen.style = PaintingStyle.fill;
-        backgroundPen.color = Colors.white;
-        canvas.drawCircle(Offset(thumb.x, middleHeight), _radius, backgroundPen);
-      }
-      for (Thumb thumb in _thumbs) {
-        var thumbPen = Paint();
-        thumbPen.style = PaintingStyle.fill;
-        thumbPen.color = convertLocToCol(thumb.x, thumb.isActive, size);
-        canvas.drawCircle(Offset(thumb.x, middleHeight), _radius, thumbPen);
-      }
+    if(_thumb != null) {
+      var backgroundPen = Paint();
+      backgroundPen.style = PaintingStyle.fill;
+      backgroundPen.color = Colors.white;
+      canvas.drawCircle(Offset(_thumb.current, middleHeight), _radius, backgroundPen);
+      var thumbPen = Paint();
+      thumbPen.style = PaintingStyle.fill;
+      thumbPen.color = convertLocToCol(_thumb.current, _thumb.isActive, size);
+      canvas.drawCircle(Offset(_thumb.current, middleHeight), _radius, thumbPen);
     }
     // draw the line all the way across the center of the canvas
   }
@@ -244,12 +262,8 @@ class UnusableSliderPainter extends CustomPainter {
     if (oldDelegate._radius != _radius) {
       return true;
     }
-    for(int i = 0; i < _thumbs.length; i++) {
-      Thumb old = oldDelegate._thumbs[i];
-      Thumb upd = _thumbs[i];
-      if(old.isActive != upd.isActive || old.x != upd.x) {
-        return true;
-      }
+    if(oldDelegate._thumb.isActive != _thumb.isActive || oldDelegate._thumb.current != _thumb.current) {
+      return true;
     }
     return false;
   }
