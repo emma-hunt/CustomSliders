@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 import 'MultiThumbSlider.dart';
 import 'CurvedSlider.dart';
+import 'UnusableSlider.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: MyHomePage(title: 'Simple Slider'),
+      home: MyHomePage(title: 'Unusable Slider'),
     );
   }
 }
@@ -63,11 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the cross axis would be horizontal
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          CurvedSlider(
-            minorRad: 200,
-            majorRad: 200,
-            numThumbs: 2,
-            side: Side.left,
+          UnusableSlider(
             startValue: 0,
             endValue: 100,
             onChanged: (Map newThumbs) {
@@ -91,21 +88,49 @@ class _MyHomePageState extends State<MyHomePage> {
               });
             },
           ),
-//          Container(
-//            height: 100,
-//            padding: EdgeInsets.all(5.0),
-//            child:
-//            ListView.builder(
-//                itemCount: myThumbs.length,
-//                itemBuilder: (BuildContext context, int index) {
-//                  return Text(
-//                    myThumbs[index].item1.toString(),
-//                    style: TextStyle(color: myThumbs[index].item2),
-//                    textAlign: TextAlign.center,
-//                  );
-//                }
-//            )
+//          CurvedSlider(
+//            minorRad: 200,
+//            majorRad: 200,
+//            numThumbs: 2,
+//            side: Side.left,
+//            startValue: 0,
+//            endValue: 100,
+//            onChanged: (Map newThumbs) {
+//              //print("in value callback ");
+//              setState(() {
+//                myThumbs = _prettifyTheValues(newThumbs);
+//              });
+//            },
+//            onActive: (Map newThumbs) {
+//              //print("in active callback");
+//              setState(() {
+//                isSliderActive = true;
+//                myThumbs = _prettifyTheValues(newThumbs);
+//              });
+//            },
+//            onInactive: (Map newThumbs) {
+//              //print("in inactive callback");
+//              setState(() {
+//                isSliderActive = false;
+//                myThumbs = _prettifyTheValues(newThumbs);
+//              });
+//            },
 //          ),
+          Container(
+            height: 100,
+            padding: EdgeInsets.all(5.0),
+            child:
+            ListView.builder(
+                itemCount: myThumbs.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Text(
+                    myThumbs[index].item1.toString(),
+                    style: TextStyle(color: myThumbs[index].item2),
+                    textAlign: TextAlign.center,
+                  );
+                }
+            )
+          ),
         ],
       ),
     );
