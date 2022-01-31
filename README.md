@@ -1,10 +1,10 @@
-# simple_flutter
+# Custom Slider
 
-A new Flutter application.
+A set of custom sliders built using Flutter for both android and iOS. These sliders explore non-traditional interfaces that enhance or inhibit the user's ability to set a value using a slider.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Flutter is a UI building language built on React Native which allows the simultanious development of mondern apps for iOS, Android and web.
 
 A few resources to get you started if this is your first Flutter project:
 
